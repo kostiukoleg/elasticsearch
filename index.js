@@ -2,11 +2,43 @@
  * Created by okostiuk on 25.03.15.
  */
 var elasticsearch = require('elasticsearch');//подключаем elasticsearch
-var async = require('async');
-var mongoose = require('mongoose');//подлючаем базу данних mongoose
-var adsField;
+var async = require('async');//подключаем библиотеку async
+var mongoose = require('mongoose');
 mongoose.connect('mongodb://127.0.0.1:27017/ads');//создаем безу данних на mongoose
-var db = mongoose.connection;//поблючаемся к базе (незнаю или робочие изменения)
+var Schema = mongoose.Schema;
+var schema = new Schema({
+    advPair: [Number],
+    similarity: Number,
+    owner: [Number]
+});
+var Ads = mongoose.model('Ads',schema);
+
+var ads = new Ads({
+    advPair: [1,2],
+    similarity: 60,
+    owner: [0,1]
+});
+console.log(ads);
+ads.save(
+    function(err,ads,effected){
+        console.log(arguments);
+    }
+);
+
+/*var db = mongoose.connection.db;//поблючаемся к базе (незнаю или робочие изменения)
+
+db.dropDatabase(function(err){
+    if (err) throw err;
+    console.log('OK');
+});*/
+
+
+
+
+
+
+
+/*
 db.on('error', function (err) {
     console.log('connection error:', err.message);//виводим ошибку если не удалось подключиться к базе
 });
@@ -56,4 +88,4 @@ db.on('open', function () {
     });
     console.log("Connected to DB!");//виводим сообщение об вдалом подключении
    // mongoose.disconnect();
-});
+});*/
