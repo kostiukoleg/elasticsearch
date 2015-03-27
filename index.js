@@ -11,7 +11,7 @@ db.on('error', function (err) {
     console.log('connection error:', err.message);//виводим ошибку если не удалось подключиться к базе
 });
 
-db.once('open', function () {
+db.on('open', function () {
 
     var Schema = mongoose.Schema;//создаем схему mongoose бази
     var ads = new Schema({
@@ -40,23 +40,20 @@ db.once('open', function () {
     }).then(function (resp) {
         var hits = resp.hits.hits;//Записиваем дпние с дапроса в переменную
         hits.forEach(
-            async.parallel([
-              function(callback,itm){
+              function(itm){
                   adsField = new adsModel({
                       realty_id: itm._source.realty_id,
                       ads_proc: Math.random()*100
                   });
-                  adsField.save(function (err,res){
-                      callback(err,res); //process.exit(0);
+                  adsField.save(
+                      function (err,res){
+                      console.log(err,res); //process.exit(0);
                   });
-              }
-            ],function(err,result){
-                console.log(arguments);
-                mongoose.disconnect();
-            });
-        );
+              });
+
     }, function (err) {
         console.trace(err.message);//виводим сообщение об ошибке если не удалось получить ответ от elasticsearch
     });
     console.log("Connected to DB!");//виводим сообщение об вдалом подключении
+   // mongoose.disconnect();
 });
