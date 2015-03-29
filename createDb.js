@@ -1,7 +1,7 @@
 /**
  * Created by okostiuk on 27.03.15.
  */
-var elasticsearch = require('elasticsearch');
+//var elasticsearch = require('elasticsearch');
 var Ads = require('./models/ads').Ads;
 var mongoose = require('./libs/mongoose');
 var async = require('async');
@@ -40,3 +40,4 @@ function createAds(callback){
 function close(callback){
     mongoose.disconnect(callback);
 }
+

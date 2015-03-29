@@ -9,5 +9,10 @@ module.exports = {
         }
       }
     }
+  },
+  "elasticsearch": {
+    "host": "10.1.18.18",
+    "port": 9200,
+    "log": "trace"
   }
 }
