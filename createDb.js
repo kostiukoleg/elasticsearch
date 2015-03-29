@@ -4,6 +4,7 @@
 //var elasticsearch = require('elasticsearch');
 var Ads = require('./models/ads').Ads;
 var mongoose = require('./libs/mongoose');
+var client = require('./libs/elasticsearch');
 var async = require('async');
 
 async.series([
@@ -26,18 +27,40 @@ function dropDatabase(callback){
 }
 
 function createAds(callback){
-    var adses = [
-        {advPair: [0, 1], similarity: 60, owner: [1, 0]},
-        {advPair: [2, 3], similarity: 65, owner: [0, 0]},
-        {advPair: [4, 5], similarity: 40, owner: [1, 0]}
-    ];
-    async.each(adses,function(adsData, callback){
-        var ads = new Ads(adsData);
-        ads.save(callback);
-    }, callback);
+    var adses = [];
+    client.search({//создаем запрос для elasticsearch
+        index: 'blog',
+        type: 'post',
+        body: {
+            //_source: 'realty_id',
+            query: {
+                match: {
+                    city_name: "Винница"
+                }
+            }/*,
+             from : 0,
+             size : 250*/
+        }
+    }).then(function (resp) {
+        var hits = resp.hits.hits;//Записиваем дпние с дапроса в переменную
+        hits.forEach(
+            function(itm){
+                adses.push({advPair: [//itm._source.realty_id
+                    4, 9332342], similarity: Math.random()*100, owner: [1, 0]});
+            });
+        async.each(adses,function(adsData, callback){
+            var ads = new Ads(adsData);
+            ads.save(callback);
+        }, callback);
+    }, function (err) {
+        console.trace(err.message);//виводим сообщение об ошибке если не удалось получить ответ от elasticsearch
+    });
 }
 
 function close(callback){
     mongoose.disconnect(callback);
 }
+
+//var adses = require('./models/search.js');
+
 
