@@ -61,6 +61,4 @@ function close(callback){
     mongoose.disconnect(callback);
 }
 
-//var adses = require('./models/search.js');
-
 
