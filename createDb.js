@@ -29,24 +29,23 @@ function dropDatabase(callback){
 function createAds(callback){
     var adses = [];
     client.search({//создаем запрос для elasticsearch
-        index: 'blog',
-        type: 'post',
+        index: 'search_index',
+        type: 'search_type',
         body: {
-            //_source: 'realty_id',
+            _source: 'realty_id',
             query: {
                 match: {
                     city_name: "Винница"
                 }
-            }/*,
+            },
              from : 0,
-             size : 250*/
+             size : 250
         }
     }).then(function (resp) {
         var hits = resp.hits.hits;//Записиваем дпние с дапроса в переменную
         hits.forEach(
             function(itm){
-                adses.push({advPair: [//itm._source.realty_id
-                    4, 9332342], similarity: Math.random()*100, owner: [1, 0]});
+                adses.push({advPair: [itm._source.realty_id, 9332342], similarity: Math.random()*100, owner: [1, 0]});
             });
         async.each(adses,function(adsData, callback){
             var ads = new Ads(adsData);

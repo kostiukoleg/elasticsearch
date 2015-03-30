@@ -4,15 +4,9 @@
 var client = require('../libs/elasticsearch');
 
 client.search({//создаем запрос для elasticsearch
-    index: 'blog',
-    type: 'post',
-    body: {
-        //_source: 'realty_id',
-        query: {
-            match: {
-                city_name: "Винница"
-            }
-        }/*,
+    index: 'search_index',
+    type: 'search_type',
+
          from : 0,
          size : 250*/
     }

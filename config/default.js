@@ -11,7 +11,7 @@ module.exports = {
     }
   },
   "elasticsearch": {
-    "host": "localhost:9200",
+    "host": "10.1.18.18:9200",
     "log": "trace"
   }
 }
