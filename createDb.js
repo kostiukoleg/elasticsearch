@@ -32,14 +32,29 @@ function createAds(callback){
         index: 'search_index',
         type: 'search_type',
         body: {
-            _source: 'realty_id',
+            _source: ['realty_id','city_name','advert_type_name'],
             query: {
-                match: {
-                    city_name: "Винница"
+                bool: {
+                    must: [
+                        {
+                            query_string: {
+                                default_field: "search_type.city_name",
+                                query: "Винница"
+                            }
+                        },
+                        {
+                            query_string: {
+                                default_field: "search_type.advert_type_name",
+                                query: "продажа"
+                            }
+                        }
+                    ],
+                    must_not: [ ],
+                    should: [ ]
                 }
             },
-             from : 0,
-             size : 250
+            from : 0,
+            size : 250
         }
     }).then(function (resp) {
         var hits = resp.hits.hits;//Записиваем дпние с дапроса в переменную

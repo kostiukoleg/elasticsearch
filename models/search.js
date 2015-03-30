@@ -8,7 +8,7 @@ client.search({//создаем запрос для elasticsearch
     type: 'search_type',
 
          from : 0,
-         size : 250*/
+         size : 250
     }
 }).then(function (resp) {
     var hits = resp.hits.hits;//Записиваем дпние с дапроса в переменную

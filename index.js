@@ -1,91 +1,72 @@
 /**
  * Created by okostiuk on 25.03.15.
  */
-var elasticsearch = require('elasticsearch');//подключаем elasticsearch
-var async = require('async');//подключаем библиотеку async
-var mongoose = require('mongoose');
-mongoose.connect('mongodb://127.0.0.1:27017/ads');//создаем безу данних на mongoose
-var Schema = mongoose.Schema;
-var schema = new Schema({
-    advPair: [Number],
-    similarity: Number,
-    owner: [Number]
-});
-var Ads = mongoose.model('Ads',schema);
+var elasticsearch = require('elasticsearch');
+var client = require('./libs/elasticsearch');
+var natural = require('natural');
+var co = require('co');
 
-var ads = new Ads({
-    advPair: [1,2],
-    similarity: 60,
-    owner: [0,1]
-});
-console.log(ads);
-ads.save(
-    function(err,ads,effected){
-        console.log(arguments);
+function comparisonNumber(num1,num2){
+    var res;
+    if (num1>=num2){
+        res = (num2/(num1/100)-100);
+    } else {
+        res = (num1/(num2/100)-100);
     }
-);
+    return 100-Math.abs(res);
+}
 
-/*var db = mongoose.connection.db;//поблючаемся к базе (незнаю или робочие изменения)
+function comparisonString(str1,str2){
+    var res = natural.JaroWinklerDistance(str1,str2);
+    return res*100;
+}
 
-db.dropDatabase(function(err){
-    if (err) throw err;
-    console.log('OK');
-});*/
-
-
-
-
-
-
-
-/*
-db.on('error', function (err) {
-    console.log('connection error:', err.message);//виводим ошибку если не удалось подключиться к базе
-});
-
-db.on('open', function () {
-
-    var Schema = mongoose.Schema;//создаем схему mongoose бази
-    var ads = new Schema({
-        origin_id: { type: Number, required: true, default: 9332342 },//создаем таблицу
-        realty_id: { type: Number, required: true },
-        ads_proc: { type: Number, required: true }
-    });
-    var adsModel = mongoose.model('ads', ads);//создаем модель бази
-    var client = new elasticsearch.Client({//создаем клиент для elasticsearch
-        host: '10.1.18.18:9200',
-        log: 'trace'
-    });
-    client.search({//создаем запрос для elasticsearch
+function* elasticSearch(id){
+    return client.search({
         index: 'search_index',
         type: 'search_type',
-        body: {
-            _source: 'realty_id',
-            query: {
-                match: {
-                    city_name: "Винница"
+        body:{
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "term": {
+                                "search_type.realty_id": id
+                            }
+                        }
+                    ],
+                    "must_not": [ ],
+                    "should": [ ]
                 }
             },
-            from : 0,
-            size : 250
+            "from": 0,
+            "size": 10,
+            "sort": [ ],
+            "facets": { }
         }
-    }).then(function (resp) {
-        var hits = resp.hits.hits;//Записиваем дпние с дапроса в переменную
-        hits.forEach(
-              function(itm){
-                  adsField = new adsModel({
-                      realty_id: itm._source.realty_id,
-                      ads_proc: Math.random()*100
-                  });
-                  adsField.save(
-                      function (err,res){
-                      console.log(err,res); //process.exit(0);
-                  });
-              });
+    })
+}
 
-    }, function (err) {
-        console.trace(err.message);//виводим сообщение об ошибке если не удалось получить ответ от elasticsearch
+function* searchAds(id){
+    var resp = yield elasticSearch(id);
+    //console.log(resp);
+    var hits = resp.hits.hits;
+    var res = [];
+    hits.forEach(function(itm){
+        res.push(itm._source);
     });
-    console.log("Connected to DB!");//виводим сообщение об вдалом подключении
-   // mongoose.disconnect();
-});*/
+    return res;
+}
+var a = 9004019;
+var b = 9731481;
+co(function *(){
+    var res1 = yield searchAds(a);
+    var res2 = yield searchAds(b);
+    //console.log(res1[0].description);
+    console.log(comparisonString(res1[0].description,res2[0].description));
+    console.log(comparisonString(res1[0].rooms_count,res2[0].rooms_count));
+}).catch(onerror);
+
+function onerror(err) {
+    console.error(err.stack);
+}
