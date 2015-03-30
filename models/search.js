@@ -15,10 +15,9 @@ client.search({//создаем запрос для elasticsearch
     var adses = [];
     hits.forEach(
         function(itm){
-            adses.push({advPair: [//itm._source.realty_id
-            2, 9332342], similarity: Math.random()*100, owner: [1, 0]});
+            adses.push({advPair: [itm._source.realty_id, 9332342], similarity: Math.random()*100, owner: [1, 0]});
         });
     module.exports =  adses;
 }, function (err) {
-    console.trace(err.message);//виводим сообщение об ошибке если не удалось получить ответ от elasticsearch
+    console.trace(err.message);
 });
